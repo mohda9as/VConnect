@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCONNECT | Join Conference</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<!-- Animated Background -->
+<div class="bg-animation">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<!-- Floating Icons -->
+<div class="floating-icons">
+    <i class="fas fa-video"></i>
+    <i class="fas fa-microphone"></i>
+    <i class="fas fa-users"></i>
+    <i class="fas fa-comments"></i>
+    <i class="fas fa-share-screen"></i>
+</div>
+
+<div class="conference-container">
+    <!-- Logo and Header -->
+    <div class="logo-header">
+        <div class="logo">
+            <i class="fas fa-video"></i>
+            <span>VCONNECT</span>
+        </div>
+        <h1>Welcome to Video Conference</h1>
+        <p class="tagline">Connect, Collaborate, Communicate in Real-time</p>
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="currentUser">Guest User</span>
+            <a href="index.html" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Conference Card -->
+    <div class="conference-card">
+        <div class="card-header">
+            <h2><i class="fas fa-sign-in-alt"></i> Join Conference Room</h2>
+            <div class="room-stats">
+                <span id="activeRooms">245</span> Active Rooms
+            </div>
+        </div>
+
+        <form id="joinForm">
+            <div class="input-group">
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <input type="text" id="username" placeholder="Enter your display name" required>
+                <div class="input-hint">This name will be visible to others</div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-icon">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <input type="text" id="room" placeholder="Enter or create room name" required>
+                <div class="room-suggestions">
+                    <span class="suggestion" data-room="general">#general</span>
+                    <span class="suggestion" data-room="meeting">#team-meeting</span>
+                    <span class="suggestion" data-room="friends">#friends-chat</span>
+                </div>
+            </div>
+
+            <div class="options">
+                <label class="checkbox">
+                    <input type="checkbox" id="rememberMe" checked>
+                    <span>Remember me</span>
+                </label>
+                <a href="#" class="quick-room" id="quickRoomBtn">
+                    <i class="fas fa-bolt"></i> Quick Join
+                </a>
+            </div>
+
+            <button type="submit" class="join-btn" id="joinBtn">
+                <i class="fas fa-video"></i> Join Conference
+            </button>
+
+            <div class="separator">
+                <span>or</span>
+            </div>
+
+            <div class="alternative-actions">
+                <button type="button" class="action-btn create-room-btn">
+                    <i class="fas fa-plus-circle"></i> Create Private Room
+                </button>
+                <button type="button" class="action-btn demo-btn">
+                    <i class="fas fa-eye"></i> Try Demo
+                </button>
+            </div>
+        </form>
+
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <span>Secure & Encrypted</span>
+            </div>
+            <div class="feature">
+                <i class="fas fa-hd"></i>
+                <span>HD Quality</span>
+            </div>
+            <div class="feature">
+                <i class="fas fa-infinity"></i>
+                <span>Unlimited Time</span>
+            </div>
+        </div>
+
+        <div id="error-msg" class="error-message"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-links">
+            <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+            <a href="#"><i class="fas fa-shield-alt"></i> Privacy</a>
+            <a href="#"><i class="fas fa-file-alt"></i> Terms</a>
+        </div>
+        <div class="online-status">
+            <span class="status-dot"></span>
+            <span id="onlineUsers">1,245</span> users online
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved username
+    const savedUsername = localStorage.getItem('vc_username') || 'Guest User';
+    document.getElementById('currentUser').textContent = savedUsername;
+    document.getElementById('username').value = savedUsername;
+
+    // Load saved room if exists
+    const savedRoom = localStorage.getItem('vc_room');
+    if (savedRoom) {
+        document.getElementById('room').value = savedRoom;
+    }
+
+    // Room suggestions
+    document.querySelectorAll('.suggestion').forEach(suggestion => {
+        suggestion.addEventListener('click', function() {
+            document.getElementById('room').value = this.dataset.room;
+            showMessage(`Selected room: ${this.dataset.room}`, 'success');
+        });
+    });
+
+    // Quick join
+    document.getElementById('quickRoomBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        const rooms = ['quick-chat', 'lobby', 'general', 'meeting-room', 'casual-talk'];
+        const randomRoom = rooms[Math.floor(Math.random() * rooms.length)];
+        document.getElementById('room').value = randomRoom;
+        showMessage(`Quick joined: ${randomRoom}`, 'info');
+    });
+
+    // Create private room
+    document.querySelector('.create-room-btn').addEventListener('click', function() {
+        const username = document.getElementById('username').value.trim() || 'Host';
+        const roomId = `private-${Math.random().toString(36).substring(2, 8)}`;
+        document.getElementById('room').value = roomId;
+        showMessage(`Private room created: ${roomId}`, 'success');
+
+        // Auto-focus join button
+        setTimeout(() => {
+            document.getElementById('joinBtn').focus();
+        }, 100);
+    });
+
+    // Demo mode
+    document.querySelector('.demo-btn').addEventListener('click', function() {
+        document.getElementById('username').value = 'Demo User';
+        document.getElementById('room').value = 'demo-room';
+        document.getElementById('rememberMe').checked = true;
+        showMessage('Demo mode activated! Click "Join Conference" to experience.', 'info');
+    });
+
+    // Join form submission
+    document.getElementById('joinForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const room = document.getElementById('room').value.trim();
+        const rememberMe = document.getElementById('rememberMe').checked;
+        const joinBtn = document.getElementById('joinBtn');
+
+        // Validation
+        if (!username || !room) {
+            showMessage('Please fill in all fields', 'error');
+            return;
+        }
+
+        if (username.length < 2) {
+            showMessage('Name must be at least 2 characters', 'error');
+            return;
+        }
+
+        if (room.length < 3) {
+            showMessage('Room name must be at least 3 characters', 'error');
+            return;
+        }
+
+        // Show loading
+        joinBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+        joinBtn.disabled = true;
+
+        // Save to localStorage if remember me is checked
+        if (rememberMe) {
+            localStorage.setItem('vc_username', username);
+            localStorage.setItem('vc_room', room);
+        }
+
+        // Simulate connection process
+        showMessage('🔄 Connecting to conference server...', 'info');
+
+        setTimeout(() => {
+            // Save current session
+            sessionStorage.setItem('current_username', username);
+            sessionStorage.setItem('current_room', room);
+
+            showMessage('✅ Connected! Redirecting to video room...', 'success');
+
+            // Redirect to room page
+            setTimeout(() => {
+                window.location.href = `room.html?room=${encodeURIComponent(room)}&username=${encodeURIComponent(username)}`;
+            }, 1000);
+        }, 2000);
+    });
+
+    // Update statistics
+    function updateStatistics() {
+        document.getElementById('activeRooms').textContent = Math.floor(200 + Math.random() * 100);
+        document.getElementById('onlineUsers').textContent = Math.floor(1000 + Math.random() * 500);
+    }
+
+    // Initial update
+    updateStatistics();
+
+    // Update every 5 seconds
+    setInterval(updateStatistics, 5000);
+
+    // Helper function to show messages
+    function showMessage(message, type) {
+        const errorMsg = document.getElementById('error-msg');
+        errorMsg.textContent = message;
+        errorMsg.className = 'error-message';
+
+        if (type === 'success') {
+            errorMsg.style.color = '#44bd32';
+        } else if (type === 'error') {
+            errorMsg.style.color = '#e84118';
+            // Shake animation
+            document.querySelector('.conference-card').classList.add('shake');
+            setTimeout(() => {
+                document.querySelector('.conference-card').classList.remove('shake');
+            }, 500);
+        } else {
+            errorMsg.style.color = '#00a8ff';
+        }
+
+        // Auto-hide info messages
+        if (type === 'info') {
+            setTimeout(() => {
+                if (errorMsg.textContent === message) {
+                    errorMsg.textContent = '';
+                }
+            }, 3000);
+        }
+    }
+});
+</script>
+</body>
+</html>

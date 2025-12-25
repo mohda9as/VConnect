@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCONNECT | Video Conference Room</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<!-- Animated Background -->
+<div class="bg-animation">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<!-- Floating Icons -->
+<div class="floating-icons">
+    <i class="fas fa-video"></i>
+    <i class="fas fa-microphone"></i>
+    <i class="fas fa-users"></i>
+    <i class="fas fa-comments"></i>
+    <i class="fas fa-share-screen"></i>
+</div>
+
+<div class="room-container">
+    <!-- Header -->
+    <header class="room-header">
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-video"></i>
+                <span>VCONNECT</span>
+            </div>
+            <div class="room-info">
+                <h2 id="roomName">Meeting Room</h2>
+                <p><i class="fas fa-clock"></i> <span id="meetingTimer">00:00:00</span></p>
+                <div class="recording-status" id="recordingStatus" style="display: none;">
+                    <i class="fas fa-circle recording-dot"></i>
+                    <span>Recording</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" id="inviteBtn">
+                <i class="fas fa-user-plus"></i> Invite
+            </button>
+            <button class="header-btn leave-btn" id="leaveBtn">
+                <i class="fas fa-sign-out-alt"></i> Leave
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="room-main">
+        <!-- Video Grid -->
+        <div class="video-grid" id="videoGrid">
+            <!-- Local Video Container -->
+            <div class="video-container local-video" id="localVideoContainer">
+                <div class="video-wrapper">
+                    <div class="video-placeholder" id="localVideoPlaceholder">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="localUserName">You</span>
+                    </div>
+                    <video id="localVideo" autoplay muted playsinline style="display: none;"></video>
+                </div>
+                <div class="video-overlay">
+                    <span class="user-name" id="displayUserName">You</span>
+                    <div class="video-controls-overlay">
+                        <button class="video-control-btn" title="Mute audio">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="video-control-btn" title="Stop video">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="video-control-btn" title="Maximize">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="video-badge local-badge">
+                    <i class="fas fa-user"></i> You (Host)
+                </div>
+                <div class="video-status-indicators">
+                    <span class="status-indicator mic-status">
+                        <i class="fas fa-microphone-slash"></i>
+                    </span>
+                    <span class="status-indicator video-status">
+                        <i class="fas fa-video-slash"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Empty state message -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-content">
+                    <i class="fas fa-users"></i>
+                    <h3>Waiting for participants</h3>
+                    <p>Your video and audio are off by default. Turn them on when ready.</p>
+                    <p class="invite-instruction">Share the meeting link with others to invite them.</p>
+                    <div class="empty-state-actions">
+                        <button class="action-btn start-video-btn" id="startVideoFromEmpty">
+                            <i class="fas fa-video"></i> Start Video
+                        </button>
+                        <button class="action-btn start-audio-btn" id="startAudioFromEmpty">
+                            <i class="fas fa-microphone"></i> Unmute
+                        </button>
+                        <button class="action-btn invite-btn" id="inviteFromEmpty">
+                            <i class="fas fa-user-plus"></i> Copy Invite Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="room-sidebar">
+            <!-- Participants Section -->
+            <div class="participants-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-users"></i> Participants (<span id="participantCount">1</span>)</h3>
+                    <button class="add-participant-btn" id="addParticipantBtn" title="Add participant">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <ul class="participants-list" id="participantsList">
+                    <!-- Local user will be added here -->
+                </ul>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-comments"></i> Meeting Chat</h3>
+                    <span class="unread-count" id="unreadCount" style="display: none;">0</span>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="system-message">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Welcome to the meeting! Share the invite link to add participants.</span>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Add participants to enable chat" disabled>
+                    <button id="sendMessage" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Controls -->
+    <footer class="room-controls">
+        <div class="controls-left">
+            <button class="control-btn" id="micToggle">
+                <i class="fas fa-microphone-slash"></i>
+                <span>Unmute</span>
+            </button>
+            <button class="control-btn" id="videoToggle">
+                <i class="fas fa-video-slash"></i>
+                <span>Start Video</span>
+            </button>
+            <button class="control-btn" id="screenShareBtn">
+                <i class="fas fa-desktop"></i>
+                <span>Share Screen</span>
+            </button>
+            <button class="control-btn" id="raiseHandBtn">
+                <i class="fas fa-hand-paper"></i>
+                <span>Raise Hand</span>
+            </button>
+        </div>
+
+        <div class="controls-center">
+            <button class="control-btn" id="participantsBtn">
+                <i class="fas fa-users"></i>
+                <span>Participants (<span id="participantCount2">1</span>)</span>
+            </button>
+            <button class="control-btn" id="chatBtn">
+                <i class="fas fa-comments"></i>
+                <span>Chat</span>
+            </button>
+        </div>
+
+        <div class="controls-right">
+            <button class="control-btn" id="recordBtn">
+                <i class="fas fa-circle"></i>
+                <span>Record</span>
+            </button>
+            <button class="control-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+                <span>More</span>
+            </button>
+            <button class="control-btn end-call-btn" id="endCallBtn">
+                <i class="fas fa-phone-slash"></i>
+                <span>Leave</span>
+            </button>
+        </div>
+    </footer>
+</div>
+
+<!-- Invite Modal -->
+<div class="modal" id="inviteModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-share-alt"></i> Invite to Meeting</h3>
+        <div class="invite-methods">
+            <div class="invite-method">
+                <h4><i class="fas fa-link"></i> Meeting Link</h4>
+                <div class="invite-link">
+                    <input type="text" id="roomLink" readonly>
+                    <button id="copyLinkBtn"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+                <p class="invite-note">Share this link with people you want to join the meeting</p>
+            </div>
+
+            <div class="invite-method">
+                <h4><i class="fas fa-qrcode"></i> QR Code</h4>
+                <div class="qr-code-container">
+                    <div id="qrCode"></div>
+                    <p class="qr-note">Scan to join meeting</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="meeting-info">
+            <h4><i class="fas fa-info-circle"></i> Meeting Information</h4>
+            <p><strong>Meeting ID:</strong> <span id="meetingId">VC-123456</span></p>
+            <p><strong>Host:</strong> <span id="hostName">You</span></p>
+            <p><strong>Started:</strong> <span id="meetingStartTime">Just now</span></p>
+            <p><strong>Status:</strong> <span id="meetingStatus">Waiting for participants</span></p>
+        </div>
+
+        <div class="modal-actions">
+            <button class="modal-close" id="closeInviteModal">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Participant Modal -->
+<div class="modal" id="addParticipantModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-user-plus"></i> Add Participant</h3>
+
+        <div class="add-participant-form">
+            <div class="form-group">
+                <label for="newParticipantName"><i class="fas fa-user"></i> Participant Name</label>
+                <input type="text" id="newParticipantName" placeholder="Enter participant name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="newParticipantEmail"><i class="fas fa-envelope"></i> Email (Optional)</label>
+                <input type="email" id="newParticipantEmail" placeholder="email@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="newParticipantRole"><i class="fas fa-user-tag"></i> Role</label>
+                <select id="newParticipantRole">
+                    <option value="participant" selected>Participant</option>
+                    <option value="co-host">Co-Host</option>
+                    <option value="viewer">Viewer (Read Only)</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" id="cancelAddParticipant">Cancel</button>
+                <button type="button" class="btn-primary" id="confirmAddParticipant">Add Participant</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recording Modal -->
+<div class="modal" id="recordingModal">
+    <div class="modal-content recording-modal">
+        <h3><i class="fas fa-video"></i> Meeting Recording</h3>
+
+        <div class="recording-status-box">
+            <div class="recording-indicator">
+                <i class="fas fa-circle recording-pulse"></i>
+                <span class="recording-text">Recording in progress...</span>
+            </div>
+            <div class="recording-timer">
+                <i class="fas fa-clock"></i>
+                <span id="recordingTimer">00:00:00</span>
+            </div>
+        </div>
+
+        <div class="recording-info">
+            <p><i class="fas fa-info-circle"></i> This meeting is being recorded. All participants have been notified.</p>
+            <p><i class="fas fa-folder"></i> Recording will be saved to: <strong>Meetings/</strong><span id="recordingFileName">meeting_recording.mp4</span></p>
+            <p><i class="fas fa-database"></i> Storage used: <span id="recordingStorage">0 MB</span></p>
+        </div>
+
+        <div class="recording-controls">
+            <button class="btn-secondary" id="pauseRecording">
+                <i class="fas fa-pause"></i> Pause
+            </button>
+            <button class="btn-danger" id="stopRecording">
+                <i class="fas fa-stop"></i> Stop Recording
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Video Maximized View -->
+<div class="video-maximized" id="videoMaximized">
+    <div class="maximized-header">
+        <button class="maximize-close" id="closeMaximized">
+            <i class="fas fa-times"></i>
+        </button>
+        <h3 id="maximizedUserName">Your Video</h3>
+        <div class="maximized-recording" id="maximizedRecording" style="display: none;">
+            <i class="fas fa-circle recording-dot"></i>
+            <span>Recording</span>
+        </div>
+    </div>
+    <div class="maximized-video" id="maximizedVideo">
+        <!-- Video will be shown here -->
+    </div>
+    <div class="maximized-controls">
+        <button class="control-btn" id="maximizedMicToggle">
+            <i class="fas fa-microphone-slash"></i>
+        </button>
+        <button class="control-btn" id="maximizedVideoToggle">
+            <i class="fas fa-video-slash"></i>
+        </button>
+        <button class="control-btn" id="maximizedScreenShare">
+            <i class="fas fa-desktop"></i>
+        </button>
+        <button class="control-btn minimize-btn" id="minimizeVideo">
+            <i class="fas fa-compress"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // State variables
+    let meetingTimer = 0;
+    let recordingTimer = 0;
+    let timerInterval;
+    let recordingInterval;
+    let isMuted = true;
+    let isVideoOff = true;
+    let isScreenSharing = false;
+    let isRecording = false;
+    let isRecordingPaused = false;
+    let localStream = null;
+    let screenStream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let participants = [];
+    let chatMessages = [];
+    let currentUser = null;
+    let meetingId = null;
+    let isVideoMaximized = false;
+    let currentMaximizedVideo = null;
+
+    // DOM Elements
+    const videoGrid = document.getElementById('videoGrid');
+    const participantsList = document.getElementById('participantsList');
+    const chatMessagesEl = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendMessageBtn = document.getElementById('sendMessage');
+    const emptyState = document.getElementById('emptyState');
+    const participantCountEls = document.querySelectorAll('#participantCount, #participantCount2');
+    const meetingTimerEl = document.getElementById('meetingTimer');
+    const roomNameEl = document.getElementById('roomName');
+    const localUserNameEl = document.getElementById('localUserName');
+    const displayUserNameEl = document.getElementById('displayUserName');
+    const hostNameEl = document.getElementById('hostName');
+    const meetingIdEl = document.getElementById('meetingId');
+    const localVideo = document.getElementById('localVideo');
+    const localVideoPlaceholder = document.getElementById('localVideoPlaceholder');
+    const videoMaximized = document.getElementById('videoMaximized');
+    const maximizedVideo = document.getElementById('maximizedVideo');
+    const recordingStatus = document.getElementById('recordingStatus');
+    const recordingTimerEl = document.getElementById('recordingTimer');
+    const recordingFileName = document.getElementById('recordingFileName');
+    const recordingStorage = document.getElementById('recordingStorage');
+
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const room = urlParams.get('room') || 'My Meeting';
+    const username = urlParams.get('username') || sessionStorage.getItem('current_username') || 'Host';
+
+    // Initialize meeting
+    initializeMeeting(room, username);
+
+    async function initializeMeeting(roomName, userName) {
+        // Set up UI
+        roomNameEl.textContent = roomName;
+        currentUser = {
+            id: 'local-' + Date.now(),
+            name: userName,
+            role: 'host',
+            isMuted: true,
+            isVideoOff: true,
+            isSharing: false,
+            hasRaisedHand: false
+        };
+
+        localUserNameEl.textContent = userName;
+        displayUserNameEl.textContent = userName;
+        hostNameEl.textContent = userName;
+
+        // Generate meeting ID
+        meetingId = 'VC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+        meetingIdEl.textContent = meetingId;
+
+        // Generate recording filename
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        recordingFileName.textContent = `${roomName.replace(/\s+/g, '_')}_${timestamp}.mp4`;
+
+        // Add local user to participants list
+        addParticipant(currentUser);
+
+        // Update UI for muted/off state
+        updateControlButtons();
+        updateVideoPlaceholder();
+
+        // Start meeting timer
+        startMeetingTimer();
+
+        // Setup event listeners
+        setupEventListeners();
+
+        // Generate invite link and QR code
+        generateInviteLink();
+        generateQRCode();
+
+        // Add welcome system message
+        addSystemMessage(`Welcome to "${roomName}"! You are the host.`);
+        addSystemMessage('Your microphone and video are off by default. Turn them on when ready.');
+        addSystemMessage('Share the meeting link with others to invite them to join.');
+    }
+
+    function startMeetingTimer() {
+        const startTime = new Date();
+        timerInterval = setInterval(() => {
+            meetingTimer++;
+            const hours = Math.floor(meetingTimer / 3600);
+            const minutes = Math.floor((meetingTimer % 3600) / 60);
+            const seconds = meetingTimer % 60;
+
+            meetingTimerEl.textContent =
+                `${hours.toString().padStart(2, '0')}:` +
+                `${minutes.toString().padStart(2, '0')}:` +
+                `${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+
+    function setupEventListeners() {
+        // Main control buttons
+        document.getElementById('micToggle').addEventListener('click', toggleMic);
+        document.getElementById('videoToggle').addEventListener('click', toggleVideo);
+        document.getElementById('screenShareBtn').addEventListener('click', toggleScreenShare);
+        document.getElementById('raiseHandBtn').addEventListener('click', toggleRaiseHand);
+        document.getElementById('endCallBtn').addEventListener('click', endMeeting);
+        document.getElementById('leaveBtn').addEventListener('click', endMeeting);
+        document.getElementById('inviteBtn').addEventListener('click', showInviteModal);
+        document.getElementById('inviteFromEmpty').addEventListener('click', showInviteModal);
+        document.getElementById('addParticipantBtn').addEventListener('click', showAddParticipantModal);
+
+        // Empty state buttons
+        document.getElementById('startVideoFromEmpty').addEventListener('click', startVideoFromEmpty);
+        document.getElementById('startAudioFromEmpty').addEventListener('click', startAudioFromEmpty);
+
+        // Video overlay controls
+        document.querySelectorAll('.video-control-btn').forEach((btn, index) => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                switch(index) {
+                    case 0: toggleMic(); break;
+                    case 1: toggleVideo(); break;
+                    case 2: maximizeVideo('local'); break;
+                }
+            });
+        });
+
+        // Video container click for maximize
+        document.getElementById('localVideoContainer').addEventListener('click', function() {
+            maximizeVideo('local');
+        });
+
+        // Maximized view controls
+        document.getElementById('closeMaximized').addEventListener('click', closeMaximized);
+        document.getElementById('minimizeVideo').addEventListener('click', closeMaximized);
+        document.getElementById('maximizedMicToggle').addEventListener('click', toggleMic);
+        document.getElementById('maximizedVideoToggle').addEventListener('click', toggleVideo);
+        document.getElementById('maximizedScreenShare').addEventListener('click', toggleScreenShare);
+
+        // Invite modal
+        document.getElementById('copyLinkBtn').addEventListener('click', copyInviteLink);
+        document.getElementById('closeInviteModal').addEventListener('click', hideInviteModal);
+
+        // Add participant modal
+        document.getElementById('cancelAddParticipant').addEventListener('click', hideAddParticipantModal);
+        document.getElementById('confirmAddParticipant').addEventListener('click', addParticipantFromForm);
+
+        // Recording controls
+        document.getElementById('recordBtn').addEventListener('click', toggleRecording);
+        document.getElementById('pauseRecording').addEventListener('click', pauseRecording);
+        document.getElementById('stopRecording').addEventListener('click', stopRecording);
+
+        // Chat functionality
+        chatInput.addEventListener('input', updateSendButton);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+        sendMessageBtn.addEventListener('click', sendChatMessage);
+
+        // Close modals on outside click
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+            if (e.target === videoMaximized) {
+                closeMaximized();
+            }
+        });
+
+        // Sidebar buttons
+        document.getElementById('participantsBtn').addEventListener('click', toggleParticipants);
+        document.getElementById('chatBtn').addEventListener('click', toggleChat);
+        document.getElementById('settingsBtn').addEventListener('click', showSettingsModal);
+    }
+
+    async function toggleMic() {
+        if (isMuted) {
+            // Unmute - Request microphone access
+            try {
+                await startAudio();
+            } catch (error) {
+                showNotification('Could not access microphone. Please check permissions.', 'error');
+                return;
+            }
+        } else {
+            // Mute - Stop audio track
+            if (localStream) {
+                localStream.getAudioTracks().forEach(track => {
+                    track.enabled = false;
+                });
+            }
+            isMuted = true;
+            updateControlButtons();
+            updateVideoPlaceholder();
+            showNotification('Microphone muted');
+        }
+
+        // Update participant status
+        updateParticipantStatus(currentUser.id, { isMuted });
+    }
+
+    async function toggleVideo() {
+        if (isVideoOff) {
+            // Start video - Request camera access
+            try {
+                await startVideo();
+            } catch (error) {
+                showNotification('Could not access camera. Please check permissions.', 'error');
+                return;
+            }
+        } else {
+            // Stop video - Hide video, show placeholder
+            if (localStream) {
+                localStream.getVideoTracks().forEach(track => {
+                    track.enabled = false;
+                });
+            }
+            localVideo.style.display = 'none';
+            localVideoPlaceholder.style.display = 'flex';
+            isVideoOff = true;
+            updateControlButtons();
+            showNotification('Video stopped');
+        }
+
+        // Update participant status
+        updateParticipantStatus(currentUser.id, { isVideoOff });
+    }
+
+    async function startAudio() {
+        try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
+
+            if (localStream) {
+                // Merge audio with existing stream
+                const audioTrack = audioStream.getAudioTracks()[0];
+                localStream.addTrack(audioTrack);
+            } else {
+                localStream = audioStream;
+            }
+
+            isMuted = false;
+            updateControlButtons();
+            updateVideoPlaceholder();
+            showNotification('Microphone unmuted');
+
+            // Update recording if active
+            if (isRecording && !isRecordingPaused) {
+                updateRecordingStream();
+            }
+
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            throw error;
+        }
+    }
+
+    async function startVideo() {
+        try {
+            const videoStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    frameRate: { ideal: 30 }
+                }
+            });
+
+            if (localStream) {
+                // Add video track to existing stream
+                const videoTrack = videoStream.getVideoTracks()[0];
+                localStream.addTrack(videoTrack);
+            } else {
+                localStream = videoStream;
+            }
+
+            localVideo.srcObject = localStream;
+            localVideo.style.display = 'block';
+            localVideoPlaceholder.style.display = 'none';
+            isVideoOff = false;
+            updateControlButtons();
+
+            // Hide empty state if showing
+            if (emptyState.style.display !== 'none') {
+                emptyState.style.display = 'none';
+            }
+
+            showNotification('Video started');
+
+            // Update recording if active
+            if (isRecording && !isRecordingPaused) {
+                updateRecordingStream();
+            }
+
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            throw error;
+        }
+    }
+
+    function startVideoFromEmpty() {
+        toggleVideo();
+    }
+
+    function startAudioFromEmpty() {
+        toggleMic();
+    }
+
+    async function toggleScreenShare() {
+        try {
+            if (!isScreenSharing) {
+                screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: {
+                        cursor: 'always',
+                        displaySurface: 'monitor'
+                    },
+                    audio: true
+                });
+
+                // Stop current video track if active
+                if (!isVideoOff && localStream) {
+                    localStream.getVideoTracks().forEach(track => track.stop());
+                }
+
+                // Add screen share as video track
+                const screenTrack = screenStream.getVideoTracks()[0];
+                if (localStream) {
+                    localStream.addTrack(screenTrack);
+                }
+
+                localVideo.srcObject = screenStream;
+                localVideo.style.display = 'block';
+                localVideoPlaceholder.style.display = 'none';
+
+                isScreenSharing = true;
+                document.getElementById('screenShareBtn').classList.add('active');
+                document.getElementById('screenShareBtn').querySelector('span').textContent = 'Stop Sharing';
+                showNotification('Screen sharing started');
+
+                // Update participant status
+                updateParticipantStatus(currentUser.id, { isSharing: true });
+
+                // Update recording if active
+                if (isRecording && !isRecordingPaused) {
+                    updateRecordingStream();
+                }
+
+                // Handle when user stops sharing
+                screenTrack.onended = () => {
+                    stopScreenShare();
+                };
+
+            } else {
+                stopScreenShare();
+            }
+        } catch (error) {
+            console.log('Screen sharing cancelled or failed:', error);
+            if (error.name !== 'NotAllowedError') {
+                showNotification('Failed to share screen. Please try again.', 'error');
+            }
+        }
+    }
+
+    function stopScreenShare() {
+        if (screenStream) {
+            screenStream.getTracks().forEach(track => track.stop());
+            screenStream = null;
+        }
+
+        // Restore camera if video was on
+        if (!isVideoOff && localStream) {
+            try {
+                navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                }).then(videoStream => {
+                    const videoTrack = videoStream.getVideoTracks()[0];
+                    if (localStream) {
+                        // Replace the screen share track with camera track
+                        const oldVideoTracks = localStream.getVideoTracks();
+                        oldVideoTracks.forEach(track => {
+                            localStream.removeTrack(track);
+                            track.stop();
+                        });
+                        localStream.addTrack(videoTrack);
+                        localVideo.srcObject = localStream;
+                    }
+                });
+            } catch (error) {
+                console.error('Error restoring camera:', error);
+            }
+        } else {
+            // If video was off, show placeholder
+            localVideo.style.display = 'none';
+            localVideoPlaceholder.style.display = 'flex';
+        }
+
+        isScreenSharing = false;
+        document.getElementById('screenShareBtn').classList.remove('active');
+        document.getElementById('screenShareBtn').querySelector('span').textContent = 'Share Screen';
+        showNotification('Screen sharing stopped');
+
+        // Update participant status
+        updateParticipantStatus(currentUser.id, { isSharing: false });
+
+        // Update recording if active
+        if (isRecording && !isRecordingPaused) {
+            updateRecordingStream();
+        }
+    }
+
+    function toggleRaiseHand() {
+        const participant = participants.find(p => p.id === currentUser.id);
+        if (participant) {
+            participant.hasRaisedHand = !participant.hasRaisedHand;
+
+            const handBtn = document.getElementById('raiseHandBtn');
+            if (participant.hasRaisedHand) {
+                handBtn.classList.add('active');
+                handBtn.querySelector('span').textContent = 'Lower Hand';
+                showNotification('Hand raised');
+                addSystemMessage(`${currentUser.name} raised their hand`);
+            } else {
+                handBtn.classList.remove('active');
+                handBtn.querySelector('span').textContent = 'Raise Hand';
+                showNotification('Hand lowered');
+                addSystemMessage(`${currentUser.name} lowered their hand`);
+            }
+
+            updateParticipantList();
+        }
+    }
+
+    function toggleRecording() {
+        if (!isRecording) {
+            startRecording();
+        } else {
+            showRecordingModal();
+        }
+    }
+
+    function startRecording() {
+        if (!localStream && !screenStream) {
+            showNotification('Please enable video or audio to start recording', 'error');
+            return;
+        }
+
+        if (confirm('Start recording this meeting? All participants will be notified.')) {
+            isRecording = true;
+            isRecordingPaused = false;
+            recordedChunks = [];
+
+            // Show recording status
+            recordingStatus.style.display = 'flex';
+            document.getElementById('recordBtn').classList.add('active');
+            document.getElementById('recordBtn').querySelector('span').textContent = 'Recording...';
+
+            // Start recording timer
+            recordingTimer = 0;
+            updateRecordingTimer();
+            recordingInterval = setInterval(updateRecordingTimer, 1000);
+
+            // Start media recorder
+            const streamToRecord = screenStream || localStream;
+            if (streamToRecord) {
+                try {
+                    mediaRecorder = new MediaRecorder(streamToRecord, {
+                        mimeType: 'video/webm;codecs=vp9,opus'
+                    });
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                            updateRecordingStorage();
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        saveRecording();
+                    };
+
+                    mediaRecorder.start(1000); // Collect data every second
+
+                    showNotification('Recording started');
+                    addSystemMessage('Meeting recording has started');
+
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    showNotification('Could not start recording', 'error');
+                    stopRecording();
+                }
+            }
+        }
+    }
+
+    function pauseRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.pause();
+            isRecordingPaused = true;
+            document.getElementById('pauseRecording').innerHTML = '<i class="fas fa-play"></i> Resume';
+            showNotification('Recording paused');
+        } else if (mediaRecorder && mediaRecorder.state === 'paused') {
+            mediaRecorder.resume();
+            isRecordingPaused = false;
+            document.getElementById('pauseRecording').innerHTML = '<i class="fas fa-pause"></i> Pause';
+            showNotification('Recording resumed');
+        }
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
+
+        isRecording = false;
+        isRecordingPaused = false;
+
+        // Hide recording status
+        recordingStatus.style.display = 'none';
+        document.getElementById('recordBtn').classList.remove('active');
+        document.getElementById('recordBtn').querySelector('span').textContent = 'Record';
+
+        // Stop recording timer
+        clearInterval(recordingInterval);
+
+        // Hide recording modal
+        document.getElementById('recordingModal').style.display = 'none';
+
+        showNotification('Recording stopped');
+        addSystemMessage('Meeting recording has stopped');
+    }
+
+    function updateRecordingTimer() {
+        recordingTimer++;
+        const hours = Math.floor(recordingTimer / 3600);
+        const minutes = Math.floor((recordingTimer % 3600) / 60);
+        const seconds = recordingTimer % 60;
+
+        const timerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        recordingTimerEl.textContent = timerText;
+
+        // Update storage estimate (rough estimate: 1MB per minute for 720p)
+        const estimatedMB = Math.round((recordingTimer / 60) * 1);
+        recordingStorage.textContent = `${estimatedMB} MB`;
+    }
+
+    function updateRecordingStorage() {
+        const totalBytes = recordedChunks.reduce((total, chunk) => total + chunk.size, 0);
+        const mb = (totalBytes / (1024 * 1024)).toFixed(2);
+        recordingStorage.textContent = `${mb} MB`;
+    }
+
+    function updateRecordingStream() {
+        // If recording is active and stream changes, we need to restart recording
+        if (isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            setTimeout(() => {
+                const streamToRecord = screenStream || localStream;
+                if (streamToRecord) {
+                    mediaRecorder = new MediaRecorder(streamToRecord, {
+                        mimeType: 'video/webm;codecs=vp9,opus'
+                    });
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                            updateRecordingStorage();
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        saveRecording();
+                    };
+
+                    mediaRecorder.start(1000);
+                }
+            }, 100);
+        }
+    }
+
+    function saveRecording() {
+        if (recordedChunks.length === 0) {
+            console.log('No recording data to save');
+            return;
+        }
+
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+
+        // Create download link
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = recordingFileName.textContent;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Clean up
+        URL.revokeObjectURL(url);
+        recordedChunks = [];
+
+        showNotification('Recording saved and downloaded');
+        addSystemMessage('Recording saved successfully');
+    }
+
+    function showRecordingModal() {
+        document.getElementById('recordingModal').style.display = 'flex';
+    }
+
+    function maximizeVideo(videoId) {
+        if (isVideoMaximized) return;
+
+        isVideoMaximized = true;
+        videoMaximized.style.display = 'block';
+
+        if (videoId === 'local') {
+            document.getElementById('maximizedUserName').textContent = `${currentUser.name} (You)`;
+
+            // Show recording indicator in maximized view
+            if (isRecording) {
+                document.getElementById('maximizedRecording').style.display = 'flex';
+            }
+
+            if (!isVideoOff && (localStream || screenStream)) {
+                const videoEl = document.createElement('video');
+                videoEl.autoplay = true;
+                videoEl.playsInline = true;
+                videoEl.srcObject = screenStream || localStream;
+                maximizedVideo.innerHTML = '';
+                maximizedVideo.appendChild(videoEl);
+            } else {
+                maximizedVideo.innerHTML = `
+                    <div class="maximized-placeholder">
+                        <i class="fas fa-user-circle"></i>
+                        <span>${currentUser.name}</span>
+                        <p class="participant-role">Host</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update maximized controls
+        document.getElementById('maximizedMicToggle').innerHTML =
+            isMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+        document.getElementById('maximizedVideoToggle').innerHTML =
+            isVideoOff ? '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
+        document.getElementById('maximizedScreenShare').classList.toggle('active', isScreenSharing);
+    }
+
+    function closeMaximized() {
+        isVideoMaximized = false;
+        videoMaximized.style.display = 'none';
+        maximizedVideo.innerHTML = '';
+        document.getElementById('maximizedRecording').style.display = 'none';
+    }
+
+    function updateControlButtons() {
+        // Mic button
+        const micBtn = document.getElementById('micToggle');
+        const micIcon = micBtn.querySelector('i');
+        const micText = micBtn.querySelector('span');
+
+        if (isMuted) {
+            micBtn.classList.remove('active');
+            micIcon.className = 'fas fa-microphone-slash';
+            micText.textContent = 'Unmute';
+        } else {
+            micBtn.classList.add('active');
+            micIcon.className = 'fas fa-microphone';
+            micText.textContent = 'Mute';
+        }
+
+        // Video button
+        const videoBtn = document.getElementById('videoToggle');
+        const videoIcon = videoBtn.querySelector('i');
+        const videoText = videoBtn.querySelector('span');
+
+        if (isVideoOff) {
+            videoBtn.classList.remove('active');
+            videoIcon.className = 'fas fa-video-slash';
+            videoText.textContent = 'Start Video';
+        } else {
+            videoBtn.classList.add('active');
+            videoIcon.className = 'fas fa-video';
+            videoText.textContent = 'Stop Video';
+        }
+
+        // Update video overlay controls
+        const overlayControls = document.querySelectorAll('.video-control-btn');
+        overlayControls[0].innerHTML = isMuted ?
+            '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+        overlayControls[1].innerHTML = isVideoOff ?
+            '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
+
+        // Update status indicators
+        const micStatus = document.querySelector('.mic-status i');
+        const videoStatus = document.querySelector('.video-status i');
+
+        micStatus.className = isMuted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+        videoStatus.className = isVideoOff ? 'fas fa-video-slash' : 'fas fa-video';
+
+        // Update chat input availability
+        const hasParticipants = participants.length > 1;
+        chatInput.disabled = !hasParticipants;
+        if (!hasParticipants) {
+            chatInput.placeholder = 'Add participants to enable chat';
+        } else {
+            chatInput.placeholder = 'Type a message to everyone...';
+        }
+    }
+
+    function updateVideoPlaceholder() {
+        // Update placeholder based on mute/video status
+        const placeholderIcon = localVideoPlaceholder.querySelector('i');
+        if (isVideoOff) {
+            placeholderIcon.className = isMuted ?
+                'fas fa-user-slash' : 'fas fa-user-circle';
+        } else {
+            placeholderIcon.className = 'fas fa-user-circle';
+        }
+    }
+
+    function addParticipant(participant) {
+        participants.push(participant);
+        updateParticipantList();
+        updateEmptyState();
+
+        // Add participant to video grid if not local user
+        if (participant.id !== currentUser.id) {
+            addParticipantVideo(participant);
+        }
+
+        // Show notification for new participants (except local)
+        if (participant.id !== currentUser.id) {
+            showNotification(`${participant.name} joined the meeting`);
+            addSystemMessage(`${participant.name} joined the meeting`);
+
+            // Enable chat if this is the first participant
+            if (participants.length === 2) {
+                chatInput.disabled = false;
+                chatInput.placeholder = 'Type a message to everyone...';
+                updateSendButton();
+            }
+        }
+    }
+
+    function removeParticipant(participantId) {
+        const participant = participants.find(p => p.id === participantId);
+        if (participant) {
+            participants = participants.filter(p => p.id !== participantId);
+            updateParticipantList();
+            updateEmptyState();
+
+            // Remove from video grid
+            removeParticipantVideo(participantId);
+
+            // Show notification
+            if (participant.id !== currentUser.id) {
+                showNotification(`${participant.name} left the meeting`);
+                addSystemMessage(`${participant.name} left the meeting`);
+
+                // Disable chat if no participants left
+                if (participants.length === 1) {
+                    chatInput.disabled = true;
+                    chatInput.placeholder = 'Add participants to enable chat';
+                    sendMessageBtn.disabled = true;
+                }
+            }
+        }
+    }
+
+    function updateParticipantStatus(participantId, updates) {
+        const participant = participants.find(p => p.id === participantId);
+        if (participant) {
+            Object.assign(participant, updates);
+            updateParticipantList();
+
+            // Update video status indicators
+            const videoElement = document.getElementById(`video-${participantId}`);
+            if (videoElement) {
+                const micStatus = videoElement.querySelector('.mic-status i');
+                const videoStatus = videoElement.querySelector('.video-status i');
+
+                if (micStatus && updates.isMuted !== undefined) {
+                    micStatus.className = updates.isMuted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+                }
+                if (videoStatus && updates.isVideoOff !== undefined) {
+                    videoStatus.className = updates.isVideoOff ? 'fas fa-video-slash' : 'fas fa-video';
+                }
+            }
+        }
+    }
+
+    function addParticipantVideo(participant) {
+        // Remove empty state if showing
+        if (emptyState.style.display !== 'none') {
+            emptyState.style.display = 'none';
+        }
+
+        const videoContainer = document.createElement('div');
+        videoContainer.className = 'video-container remote-video';
+        videoContainer.id = `video-${participant.id}`;
+        videoContainer.dataset.participantId = participant.id;
+
+        // Create video placeholder
+        const videoWrapper = document.createElement('div');
+        videoWrapper.className = 'video-wrapper';
+
+        const videoPlaceholder = document.createElement('div');
+        videoPlaceholder.className = 'video-placeholder';
+        videoPlaceholder.innerHTML = `
+            <i class="fas fa-user-circle"></i>
+            <span>${participant.name}</span>
+        `;
+
+        const videoOverlay = document.createElement('div');
+        videoOverlay.className = 'video-overlay';
+
+        const userName = document.createElement('span');
+        userName.className = 'user-name';
+        userName.textContent = participant.name;
+
+        const videoControls = document.createElement('div');
+        videoControls.className = 'video-controls-overlay';
+
+        const maximizeBtn = document.createElement('button');
+        maximizeBtn.className = 'video-control-btn';
+        maximizeBtn.title = 'Maximize';
+        maximizeBtn.innerHTML = '<i class="fas fa-expand"></i>';
+        maximizeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            maximizeParticipantVideo(participant.id);
+        });
+
+        videoControls.appendChild(maximizeBtn);
+
+        videoOverlay.appendChild(userName);
+        videoOverlay.appendChild(videoControls);
+
+        // Add role badge
+        let badgeClass = '';
+        let badgeIcon = '';
+        let badgeText = '';
+
+        switch(participant.role) {
+            case 'co-host':
+                badgeClass = 'co-host-badge';
+                badgeIcon = 'fa-user-tie';
+                badgeText = 'Co-Host';
+                break;
+            case 'viewer':
+                badgeClass = 'viewer-badge';
+                badgeIcon = 'fa-eye';
+                badgeText = 'Viewer';
+                break;
+            case 'host':
+                badgeClass = 'local-badge';
+                badgeIcon = 'fa-user';
+                badgeText = 'Host';
+                break;
+            default:
+                badgeClass = 'participant-badge';
+                badgeIcon = 'fa-user';
+                badgeText = 'Participant';
+        }
+
+        const badge = document.createElement('div');
+        badge.className = `video-badge ${badgeClass}`;
+        badge.innerHTML = `<i class="fas ${badgeIcon}"></i> ${badgeText}`;
+
+        // Status indicators
+        const statusIndicators = document.createElement('div');
+        statusIndicators.className = 'video-status-indicators';
+
+        const micStatus = document.createElement('span');
+        micStatus.className = 'status-indicator mic-status';
+        micStatus.innerHTML = `<i class="fas ${participant.isMuted ? 'fa-microphone-slash' : 'fa-microphone'}"></i>`;
+
+        const videoStatus = document.createElement('span');
+        videoStatus.className = 'status-indicator video-status';
+        videoStatus.innerHTML = `<i class="fas ${participant.isVideoOff ? 'fa-video-slash' : 'fa-video'}"></i>`;
+
+        statusIndicators.appendChild(micStatus);
+        statusIndicators.appendChild(videoStatus);
+
+        videoWrapper.appendChild(videoPlaceholder);
+        videoContainer.appendChild(videoWrapper);
+        videoContainer.appendChild(videoOverlay);
+        videoContainer.appendChild(badge);
+        videoContainer.appendChild(statusIndicators);
+
+        // Add click to maximize
+        videoContainer.addEventListener('click', () => {
+            maximizeParticipantVideo(participant.id);
+        });
+
+        videoGrid.appendChild(videoContainer);
+    }
+
+    function maximizeParticipantVideo(participantId) {
+        if (isVideoMaximized) return;
+
+        const participant = participants.find(p => p.id === participantId);
+        if (!participant) return;
+
+        isVideoMaximized = true;
+        videoMaximized.style.display = 'block';
+        document.getElementById('maximizedUserName').textContent = participant.name;
+
+        // Show recording indicator if active
+        if (isRecording) {
+            document.getElementById('maximizedRecording').style.display = 'flex';
+        }
+
+        maximizedVideo.innerHTML = `
+            <div class="maximized-placeholder">
+                <i class="fas fa-user-circle"></i>
+                <span>${participant.name}</span>
+                <p class="participant-role">${participant.role === 'co-host' ? 'Co-Host' :
+                                           participant.role === 'viewer' ? 'Viewer' :
+                                           participant.role === 'host' ? 'Host' : 'Participant'}</p>
+            </div>
+        `;
+    }
+
+    function removeParticipantVideo(participantId) {
+        const videoElement = document.getElementById(`video-${participantId}`);
+        if (videoElement) {
+            videoElement.remove();
+        }
+    }
+
+    function updateParticipantList() {
+        participantsList.innerHTML = '';
+
+        participants.forEach(participant => {
+            const li = document.createElement('li');
+            li.className = 'participant-item';
+            li.id = `participant-item-${participant.id}`;
+
+            const participantInfo = document.createElement('div');
+            participantInfo.className = 'participant-info';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'participant-name';
+            nameSpan.textContent = participant.name;
+
+            const roleSpan = document.createElement('span');
+            roleSpan.className = 'participant-role';
+            roleSpan.textContent = participant.role === 'host' ? 'Host' :
+                                 participant.role === 'co-host' ? 'Co-host' :
+                                 participant.role === 'viewer' ? 'Viewer' : 'Participant';
+
+            participantInfo.appendChild(nameSpan);
+            participantInfo.appendChild(roleSpan);
+
+            const participantStatus = document.createElement('div');
+            participantStatus.className = 'participant-status';
+
+            // Status indicators
+            const micStatus = document.createElement('span');
+            micStatus.className = 'mic-status';
+            micStatus.innerHTML = participant.isMuted ?
+                '<i class="fas fa-microphone-slash" title="Muted"></i>' :
+                '<i class="fas fa-microphone" title="Speaking"></i>';
+
+            const videoStatus = document.createElement('span');
+            videoStatus.className = 'video-status';
+            videoStatus.innerHTML = participant.isVideoOff ?
+                '<i class="fas fa-video-slash" title="Video off"></i>' :
+                '<i class="fas fa-video" title="Video on"></i>';
+
+            const handStatus = document.createElement('span');
+            handStatus.className = 'hand-status';
+            if (participant.hasRaisedHand) {
+                handStatus.innerHTML = '<i class="fas fa-hand-paper" title="Hand raised"></i>';
+                handStatus.style.color = '#fbc531';
+            }
+
+            const shareStatus = document.createElement('span');
+            shareStatus.className = 'share-status';
+            if (participant.isSharing) {
+                shareStatus.innerHTML = '<i class="fas fa-desktop" title="Sharing screen"></i>';
+                shareStatus.style.color = '#00a8ff';
+            }
+
+            participantStatus.appendChild(micStatus);
+            participantStatus.appendChild(videoStatus);
+            participantStatus.appendChild(handStatus);
+            participantStatus.appendChild(shareStatus);
+
+            // Add remove button for host (not for local user)
+            if (currentUser.role === 'host' && participant.id !== currentUser.id) {
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-participant-btn';
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.title = 'Remove participant';
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm(`Remove ${participant.name} from the meeting?`)) {
+                        removeParticipant(participant.id);
+                    }
+                });
+                participantStatus.appendChild(removeBtn);
+            }
+
+            li.appendChild(participantInfo);
+            li.appendChild(participantStatus);
+            participantsList.appendChild(li);
+        });
+
+        // Update participant count
+        const count = participants.length;
+        participantCountEls.forEach(el => el.textContent = count);
+        document.getElementById('participantCount2').textContent = count;
+    }
+
+    function updateEmptyState() {
+        if (participants.length <= 1 && isVideoOff) {
+            emptyState.style.display = 'flex';
+        } else {
+            emptyState.style.display = 'none';
+        }
+    }
+
+    function sendChatMessage() {
+        const message = chatInput.value.trim();
+        if (!message || !currentUser) return;
+
+        // Add to chat
+        addChatMessage(currentUser.name, message, true);
+
+        // Clear input
+        chatInput.value = '';
+        updateSendButton();
+    }
+
+    function addChatMessage(sender, message, isLocal = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${isLocal ? 'local-message' : ''}`;
+
+        const senderDiv = document.createElement('div');
+        senderDiv.className = 'message-sender';
+        senderDiv.textContent = sender + (isLocal ? ' (You)' : '');
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'message-text';
+        textDiv.textContent = message;
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        const now = new Date();
+        timeDiv.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+        messageDiv.appendChild(senderDiv);
+        messageDiv.appendChild(textDiv);
+        messageDiv.appendChild(timeDiv);
+
+        chatMessagesEl.appendChild(messageDiv);
+        chatMessages.push({ sender, message, time: new Date(), isLocal });
+
+        // Scroll to bottom
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function addSystemMessage(message) {
+        const systemDiv = document.createElement('div');
+        systemDiv.className = 'system-message';
+
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-info-circle';
+
+        const text = document.createElement('span');
+        text.textContent = message;
+
+        systemDiv.appendChild(icon);
+        systemDiv.appendChild(text);
+        chatMessagesEl.appendChild(systemDiv);
+
+        // Scroll to bottom
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function updateSendButton() {
+        sendMessageBtn.disabled = !chatInput.value.trim() || participants.length <= 1;
+    }
+
+    function generateInviteLink() {
+        const currentUrl = window.location.origin + '/conference.html?room=' + encodeURIComponent(roomNameEl.textContent);
+        document.getElementById('roomLink').value = currentUrl;
+    }
+
+    function generateQRCode() {
+        // Simple QR code generation using URL
+        const qrContainer = document.getElementById('qrCode');
+        const roomLink = document.getElementById('roomLink').value;
+
+        // Create a simple QR code using canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = 150;
+        canvas.height = 150;
+        const ctx = canvas.getContext('2d');
+
+        // Draw QR code pattern (simplified)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 150, 150);
+
+        ctx.fillStyle = '#000000';
+        // Draw positioning squares
+        ctx.fillRect(10, 10, 30, 30);
+        ctx.fillRect(110, 10, 30, 30);
+        ctx.fillRect(10, 110, 30, 30);
+
+        // Draw some pattern (simplified QR)
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < 10; j++) {
+                if ((i + j) % 3 === 0) {
+                    ctx.fillRect(30 + i * 9, 30 + j * 9, 6, 6);
+                }
+            }
+        }
+
+        qrContainer.appendChild(canvas);
+    }
+
+    function copyInviteLink() {
+        const roomLink = document.getElementById('roomLink');
+        roomLink.select();
+        document.execCommand('copy');
+        showNotification('Meeting link copied to clipboard!');
+    }
+
+    function showInviteModal() {
+        document.getElementById('inviteModal').style.display = 'flex';
+    }
+
+    function hideInviteModal() {
+        document.getElementById('inviteModal').style.display = 'none';
+    }
+
+    function showAddParticipantModal() {
+        document.getElementById('addParticipantModal').style.display = 'flex';
+    }
+
+    function hideAddParticipantModal() {
+        document.getElementById('addParticipantModal').style.display = 'none';
+        // Clear form
+        document.getElementById('newParticipantName').value = '';
+        document.getElementById('newParticipantEmail').value = '';
+        document.getElementById('newParticipantRole').value = 'participant';
+    }
+
+    function addParticipantFromForm() {
+        const name = document.getElementById('newParticipantName').value.trim();
+        const email = document.getElementById('newParticipantEmail').value.trim();
+        const role = document.getElementById('newParticipantRole').value;
+
+        if (!name) {
+            showNotification('Please enter participant name', 'error');
+            return;
+        }
+
+        // Generate unique ID for participant
+        const participantId = 'user-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+
+        const participant = {
+            id: participantId,
+            name: name,
+            email: email || null,
+            role: role,
+            isMuted: true, // New participants join muted
+            isVideoOff: true, // New participants join with video off
+            isSharing: false,
+            hasRaisedHand: false,
+            joinedAt: new Date().toISOString()
+        };
+
+        addParticipant(participant);
+        hideAddParticipantModal();
+
+        // Show success notification
+        showNotification(`${name} has been added to the meeting`);
+
+        // If email was provided, simulate sending invitation
+        if (email) {
+            setTimeout(() => {
+                addSystemMessage(`Invitation sent to ${email}`);
+            }, 1000);
+        }
+    }
+
+    function showSettingsModal() {
+        alert('Settings: You can configure audio, video, and meeting preferences here.');
+    }
+
+    function toggleParticipants() {
+        const participantsSection = document.querySelector('.participants-section');
+        const chatSection = document.querySelector('.chat-section');
+
+        if (participantsSection.style.display === 'none') {
+            participantsSection.style.display = 'block';
+            chatSection.style.display = 'none';
+        } else {
+            participantsSection.style.display = 'none';
+        }
+    }
+
+    function toggleChat() {
+        const chatSection = document.querySelector('.chat-section');
+        const participantsSection = document.querySelector('.participants-section');
+
+        if (chatSection.style.display === 'none') {
+            chatSection.style.display = 'flex';
+            participantsSection.style.display = 'none';
+        } else {
+            chatSection.style.display = 'none';
+        }
+    }
+
+    function endMeeting() {
+        if (confirm('Are you sure you want to leave the meeting?')) {
+            // Stop recording if active
+            if (isRecording) {
+                stopRecording();
+            }
+
+            // Stop all media tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+            }
+
+            // Clear timers
+            clearInterval(timerInterval);
+            if (recordingInterval) clearInterval(recordingInterval);
+
+            // Redirect to conference page
+            window.location.href = 'conference.html';
+        }
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease forwards';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+});
+</script>
+
+<!-- Email Invitation Modal -->
+<div class="modal" id="emailInviteModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-envelope"></i> Send Email Invitation</h3>
+
+        <div class="email-form">
+            <div class="form-group">
+                <label for="recipientEmail">Recipient Email*</label>
+                <input type="email" id="recipientEmail" placeholder="friend@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="recipientName">Recipient Name</label>
+                <input type="text" id="recipientName" placeholder="John Doe">
+            </div>
+
+            <div class="form-group">
+                <label for="meetingTitle">Meeting Title</label>
+                <input type="text" id="meetingTitle" placeholder="My VCONNECT Meeting">
+            </div>
+
+            <div class="invite-preview">
+                <h4>Preview:</h4>
+                <p><strong>Meeting Link:</strong> <span id="previewLink">Loading...</span></p>
+                <p><strong>Host:</strong> <span id="previewHost">You</span></p>
+            </div>
+
+            <div class="email-status" id="emailStatus"></div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancelEmail">
+                    Cancel
+                </button>
+                <button class="btn-primary" id="sendEmailBtn">
+                    <i class="fas fa-paper-plane"></i> Send Invitation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- End Call Options Modal -->
+<div class="modal" id="endCallModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-phone-slash"></i> End Call Options</h3>
+
+        <div class="end-call-options">
+            <div class="end-option" data-action="leave">
+                <div class="option-icon">
+                    <i class="fas fa-user-slash"></i>
+                </div>
+                <div class="option-content">
+                    <h4>Leave Call (Stay on Page)</h4>
+                    <p>Disconnect from the call but stay on this page. You can rejoin later.</p>
+                </div>
+            </div>
+
+            <div class="end-option" data-action="end-all">
+                <div class="option-icon">
+                    <i class="fas fa-users-slash"></i>
+                </div>
+                <div class="option-content">
+                    <h4>End Meeting for All</h4>
+                    <p>End the meeting for everyone. All participants will be disconnected.</p>
+                </div>
+            </div>
+
+            <div class="end-option" data-action="leave-page">
+                <div class="option-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <div class="option-content">
+                    <h4>Leave Page</h4>
+                    <p>Leave the meeting and go back to the homepage.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-secondary" id="cancelEndCall">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Call Ended Screen (when user leaves but stays on page) -->
+<div class="call-ended-screen" id="callEndedScreen" style="display: none;">
+    <div class="ended-content">
+        <div class="ended-icon">
+            <i class="fas fa-phone-slash"></i>
+        </div>
+        <h2>You have left the meeting</h2>
+        <p>You are no longer connected to the call, but you can still:</p>
+
+        <div class="ended-actions">
+            <button class="btn-primary" id="rejoinBtn">
+                <i class="fas fa-redo"></i> Rejoin Meeting
+            </button>
+            <button class="btn-secondary" id="newMeetingBtn">
+                <i class="fas fa-plus-circle"></i> Start New Meeting
+            </button>
+            <button class="btn-outline" id="goHomeBtn">
+                <i class="fas fa-home"></i> Go to Homepage
+            </button>
+        </div>
+
+        <div class="meeting-info">
+            <h4>Meeting Information</h4>
+            <p><strong>Room:</strong> <span id="endedRoomName">My Room</span></p>
+            <p><strong>Meeting ID:</strong> <span id="endedMeetingId">VC-123456</span></p>
+            <p><strong>Duration:</strong> <span id="endedDuration">00:00:00</span></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

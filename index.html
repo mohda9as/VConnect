@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VCONNECT | Authentication</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<!-- Animated Background -->
+<div class="bg-animation">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<!-- Floating Icons -->
+<div class="floating-icons">
+    <i class="fas fa-video"></i>
+    <i class="fas fa-microphone"></i>
+    <i class="fas fa-users"></i>
+    <i class="fas fa-comments"></i>
+    <i class="fas fa-share-screen"></i>
+</div>
+
+<div class="auth-container">
+    <!-- LEFT -->
+    <div class="brand-side">
+        <div class="brand-content">
+            <div class="logo">
+                <i class="fas fa-video"></i>
+                <h1>VCONNECT</h1>
+            </div>
+            <div class="company-brief">
+                <h2>Smart Video Communication</h2>
+                <p>VCONNECT is a modern video conferencing platform designed for businesses, institutions, and teams.</p>
+                <p>We focus on speed, simplicity, and scalable collaboration.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="form-side">
+        <!-- Tabs -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="loginTab">Login</button>
+            <button class="auth-tab" id="signupTab">Sign Up</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="auth-form active" id="loginForm">
+            <h3>Welcome back</h3>
+            <p class="form-subtitle">Enter your credentials</p>
+            <form id="loginFormInner">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" placeholder="Email or phone number" id="loginContact" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="Password" id="loginPassword" required>
+                    <button type="button" class="toggle-password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <button class="submit-btn" type="submit" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Sign in
+                </button>
+                <p class="auth-switch">
+                    Don't have an account? <a href="#" id="switchToSignup">Sign up</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- SIGNUP -->
+        <div class="auth-form" id="signupForm">
+            <h3>Start your journey</h3>
+            <p class="form-subtitle">Join VCONNECT today</p>
+            <form id="signupFormInner">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" placeholder="Email or phone number" id="signupContact" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="Create password" id="signupPassword" required>
+                    <button type="button" class="toggle-password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <button class="submit-btn" type="submit" id="signupBtn">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+            <p class="auth-switch">
+                Already have an account? <a href="#" id="switchToLogin">Sign in</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const switchToSignup = document.getElementById('switchToSignup');
+    const switchToLogin = document.getElementById('switchToLogin');
+
+    function showLogin() {
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+        loginForm.classList.add('active');
+        signupForm.classList.remove('active');
+    }
+
+    function showSignup() {
+        signupTab.classList.add('active');
+        loginTab.classList.remove('active');
+        signupForm.classList.add('active');
+        loginForm.classList.remove('active');
+    }
+
+    loginTab.addEventListener('click', showLogin);
+    signupTab.addEventListener('click', showSignup);
+    switchToSignup.addEventListener('click', function(e) {
+        e.preventDefault();
+        showSignup();
+    });
+    switchToLogin.addEventListener('click', function(e) {
+        e.preventDefault();
+        showLogin();
+    });
+
+    // Password toggle
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('input');
+            const icon = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        });
+    });
+
+    // Login form
+    document.getElementById('loginFormInner').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const loginContact = document.getElementById('loginContact').value.trim();
+        const loginPassword = document.getElementById('loginPassword').value.trim();
+        const loginBtn = document.getElementById('loginBtn');
+
+        if (!loginContact || !loginPassword) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        // Show loading
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+        loginBtn.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            alert('Login successful!');
+            window.location.href = 'conference.html';
+        }, 1500);
+    });
+
+    // Signup form
+    document.getElementById('signupFormInner').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const signupContact = document.getElementById('signupContact').value.trim();
+        const signupPassword = document.getElementById('signupPassword').value.trim();
+        const signupBtn = document.getElementById('signupBtn');
+
+        if (!signupContact || !signupPassword) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        if (signupPassword.length < 6) {
+            alert('Password must be at least 6 characters');
+            return;
+        }
+
+        // Show loading
+        signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+        signupBtn.disabled = true;
+
+        // Simulate API call
+        setTimeout(() => {
+            alert('Account created successfully!');
+            window.location.href = 'conference.html';
+        }, 1500);
+    });
+
+    // Demo login on Enter key
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+            // Auto login for demo
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.click();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
