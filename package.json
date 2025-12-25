@@ -1,8 +1,33 @@
 {
+  "name": "vconnect",
+  "version": "1.0.0",
+  "description": "Professional Video Conferencing Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'No build required for static files'",
+    "vercel-build": "mkdir -p public api && cp -r *.html css js public/ || true && cp api/*.js api/"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.2.1",
-    "nodemailer": "^7.0.12"
-  }
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "nodemailer": "^6.10.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "video-conference",
+    "webrtc",
+    "video-call",
+    "meeting"
+  ],
+  "author": "VCONNECT Team",
+  "license": "MIT"
 }
